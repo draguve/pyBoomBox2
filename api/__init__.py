@@ -10,4 +10,8 @@ from flask import flash
 from flask import send_from_directory
 from flask import current_app
 
+import spotipy
+import spotipy.util as util
+
 api = Blueprint('api', __name__)
+
