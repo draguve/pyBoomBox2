@@ -4,6 +4,7 @@ from flask_script import Manager
 from webui import webui
 from api import api
 
+#importing api and webui
 app = Flask(__name__)
 app.register_blueprint(webui)
 app.register_blueprint(api, url_prefix="/api")
