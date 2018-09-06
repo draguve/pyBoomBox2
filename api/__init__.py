@@ -15,3 +15,18 @@ import spotipy.util as util
 
 api = Blueprint('api', __name__)
 
+username = 'username'
+client_id='clientid'
+client_secret='clientsecret'
+redirect_uri='redirecturl'
+
+
+def get_token():
+    scope = 'playlist-modify-private'
+    token = util.prompt_for_user_token(username,scope,client_id=client_id,client_secret=client_secret,redirect_uri=redirect_uri)
+    return token
+
+@api.route("/get_token/")
+def token():
+    return get_token()
+
