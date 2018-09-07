@@ -12,6 +12,10 @@ from flask import current_app
 
 import spotipy
 import spotipy.util as util
+from spotipy.oauth2 import SpotifyClientCredentials
+
+import json
+import random
 
 api = Blueprint('api', __name__)
 
@@ -30,3 +34,14 @@ def get_token():
 def token():
     return get_token()
 
+def get_random_playlists(limit=1,offset=-1):
+    if(offset==-1):
+        offset = random.randint(0,1500)
+    client_credentials_manager = SpotifyClientCredentials(client_id, client_secret)
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+    playlists = sp.user_playlists('spotify',limit=limit,offset=offset)
+    return playlists
+
+@api.route("/get_random_playlist")
+def get_random_playlist():
+    return json.dumps(get_random_playlists(limit=5))

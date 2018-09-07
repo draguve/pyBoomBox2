@@ -5,8 +5,11 @@ from webui import webui
 from api import api
 from api import get_token
 
+from config import config
+
 #importing api and webui
 app = Flask(__name__)
+app.config.from_object(config['dev'])
 app.register_blueprint(webui)
 app.register_blueprint(api, url_prefix="/api")
 manager = Manager(app=app)
