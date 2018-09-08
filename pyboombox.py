@@ -3,7 +3,7 @@ from flask_script import Manager
 
 from webui import webui
 from api import api
-from api import get_token
+from api.spotify import get_token
 
 from config import config
 
