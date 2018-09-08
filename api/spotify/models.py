@@ -41,4 +41,10 @@ class Artist:
         for image in json['images']:
             self.images.append(image['url'])
 
+class Playlist:
+    def __init__(self,json):
+        self.id = json['id']
+        self.name = json['name']
+        
+
 
