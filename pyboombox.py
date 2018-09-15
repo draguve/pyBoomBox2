@@ -1,17 +1,10 @@
-from flask import Flask
 from flask_script import Manager
+from app import create_app
+from app.api.spotify import get_token
 
-from webui import webui
-from api import api
-from api.spotify import get_token
+import os
 
-from config import config
-
-#importing api and webui
-app = Flask(__name__)
-app.config.from_object(config['dev'])
-app.register_blueprint(webui)
-app.register_blueprint(api, url_prefix="/api")
+app = create_app(os.getenv('FLASK_CONFIG') or 'dev')
 manager = Manager(app=app)
 
 @app.after_request
