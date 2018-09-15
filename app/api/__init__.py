@@ -32,7 +32,6 @@ def get_random_playlist():
 
 @api.route("/celery_test")
 def celery_test():
-    send_async_email.apply_async(args=[msg], countdown=60)
     testing.apply_async(args=["Hello"],countdown=10)
     return 'Testing'
 
