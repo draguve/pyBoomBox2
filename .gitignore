@@ -61,3 +61,5 @@ target/
 .cache-*
 .vscode
 
+#Redis 
+redis-stable/
