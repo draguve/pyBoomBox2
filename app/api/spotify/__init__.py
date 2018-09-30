@@ -73,3 +73,19 @@ def get_tracks(track_ids):
         tracks.append(Track(track_json))
     return tracks
 
+#Returns the current track playing 
+def get_current_track():
+    sp = spotipy.Spotify(auth=get_token())
+    return Track(sp.current_user_playing_track())
+
+#creates a new playlist from a models.Track[] object
+def create_playlist(user,playlist_name,description='',tracks_to_add):
+    sp = spotipy.Spotify(auth=get_token())
+    #Need to test this 
+    playlist = Playlist(sp.user_playlist_create(user, playlist_name, public=True, description=description))
+    
+    tracks = []
+    for track in tracks_to_add:
+        tracks.append(track)
+    sp.user_playlist_add_tracks(user, playlist.id , tracks, position=None)
+    return None

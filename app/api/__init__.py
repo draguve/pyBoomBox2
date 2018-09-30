@@ -17,11 +17,6 @@ from .. import celery
 
 api = Blueprint('api', __name__)
 
-username = 'username'
-client_id='clientid'
-client_secret='clientsecret'
-redirect_uri='redirecturl'
-
 @api.route("/get_token/")
 def token():
     return spotify.get_token()
