@@ -79,7 +79,7 @@ def get_current_track():
     return Track(sp.current_user_playing_track())
 
 #creates a new playlist from a models.Track[] object
-def create_playlist(user,playlist_name,description='',tracks_to_add):
+def create_playlist(user,playlist_name,tracks_to_add,description=''):
     sp = spotipy.Spotify(auth=get_token())
     #Need to test this 
     playlist = Playlist(sp.user_playlist_create(user, playlist_name, public=True, description=description))
