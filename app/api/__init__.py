@@ -12,18 +12,9 @@ from flask import current_app
 import json
 import random
 
-import app.api.spotify
 from .. import celery
 
 api = Blueprint('api', __name__)
-
-@api.route("/get_token/")
-def token():
-    return spotify.get_token()
-
-@api.route("/get_random_playlist")
-def get_random_playlist():
-    return json.dumps(spotify.get_random_playlists(limit=5))
 
 @api.route("/celery_test")
 def celery_test():
