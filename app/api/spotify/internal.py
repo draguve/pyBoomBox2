@@ -76,7 +76,11 @@ def get_tracks(track_ids):
 #Returns the current track playing 
 def get_current_track():
     sp = spotipy.Spotify(auth=get_token())
-    return Track(sp.current_user_playing_track())
+    json = sp.current_user_playing_track()
+    #TODO Need to handle if no track is playing
+    #TODO Need to store the other data provided , time till finish , is_playing ,check if its a song 
+    track = json['item']
+    return Track(track)
 
 #creates a new playlist from a models.Track[] object
 def create_playlist(user,playlist_name,tracks_to_add,description=''):
