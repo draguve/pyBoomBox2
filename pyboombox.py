@@ -14,7 +14,8 @@ def headers(response):
 
 @manager.command
 def inittoken():
-    thing = get_token()
+    token = get_token()
+    print(token)
     
 if __name__ == "__main__":
     manager.run()

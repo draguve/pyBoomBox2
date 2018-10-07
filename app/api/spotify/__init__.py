@@ -10,4 +10,4 @@ def update_current_song():
 
 #proxy function for the server init 
 def get_token():
-    spotify.get_token()
+    return spotify.get_token()
