@@ -63,3 +63,6 @@ target/
 
 #Redis 
 redis-stable/
+
+#pyCharm
+.idea/
