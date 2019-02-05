@@ -1,13 +1,13 @@
 import spotipy
 import spotipy.util as util
 from spotipy.oauth2 import SpotifyClientCredentials
-
+import os
 from .models import *
 
-username = 'username'
-client_id = 'clientid'
-client_secret = 'clientsecret'
-redirect_uri = 'redirecturl'
+username = os.environ.get('SPOTIFY_USERNAME', 'username')
+client_id = os.environ.get('SPOTIFY_CLIENT_ID', 'clientid')
+client_secret = os.environ.get('SPOTIFY_CLIENT_SECRET', 'clientsecret')
+redirect_uri = os.environ.get('SPOTIFY_REDIRECT_URL', 'redirecturl')
 
 
 # generates and returns a token
