@@ -15,3 +15,4 @@ admin_panel = Blueprint('admin_panel', __name__, static_folder='static', templat
 @admin_panel.route('/')
 def index():
     return "Test"
+    
