@@ -10,6 +10,7 @@ from flask import send_from_directory
 from flask import current_app
 
 from worker import celery
+# from worker import cache #<- important for cache
 import celery.states as states
 
 admin_panel = Blueprint('admin_panel', __name__, static_folder='static', template_folder='templates')
@@ -23,8 +24,22 @@ def index():
 @admin_panel.route('/get_url')
 def get_url():
     task = celery.send_task('auth.get_url')
-    response = f"<a href='{url_for('admin_panel.check_task', task_id=task.id, external=True)}'>check status of {task.id} </a>"
+    response = f"<a href='{url_for('admin_panel.check_task', task_id=task.id, external=True)}'>" \
+        f"check status of {task.id} </a>"
     return response
+
+
+# FOR REFERENCE
+# @admin_panel.route('/cache_set/<string:text>')
+# def cache_set(text):
+#     cache.set("test", text)
+#     return 'set'
+#
+#
+# @admin_panel.route('/cache_get')
+# def cache_get():
+#     x = cache.get('test')
+#     return x
 
 
 @admin_panel.route('/auth_url', methods=['POST', 'GET'])
@@ -32,7 +47,8 @@ def auth_url():
     if request.method == 'POST':
         url = request.form['response']
         task = celery.send_task('auth.response_url', args=[url, ], kwargs={})
-        response = f"<a href='{url_for('admin_panel.check_task', task_id=task.id, external=True)}'>check status of {task.id} </a>"
+        response = f"<a href='{url_for('admin_panel.check_task', task_id=task.id, external=True)}'>" \
+            f"check status of {task.id} </a>"
         return response
     else:
         return render_template('auth_url_form.j2')
@@ -45,4 +61,3 @@ def check_task(task_id: str) -> str:
         return res.state
     else:
         return str(res.result)
-
