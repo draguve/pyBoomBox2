@@ -3,6 +3,7 @@ import spotipy.util as util
 from spotipy.oauth2 import SpotifyClientCredentials
 import os
 from .models import *
+from spotipy import oauth2
 
 username = os.environ.get('SPOTIFY_USERNAME', 'username')
 client_id = os.environ.get('SPOTIFY_CLIENT_ID', 'clientid')
@@ -11,11 +12,45 @@ redirect_uri = os.environ.get('SPOTIFY_REDIRECT_URL', 'redirecturl')
 
 
 # generates and returns a token
+def get_auth_url():
+    scope = 'playlist-modify-private'
+    cache_path = '.spotify_cache'
+    sp_oauth = oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri,
+                                   scope=scope, cache_path=cache_path)
+    token_info = sp_oauth.get_cached_token()
+    if not token_info:
+        auth_url = sp_oauth.get_authorize_url()
+        # here response is the url returned by the auth page
+        # code = sp_oauth.parse_response_code(response)
+        # token_info = sp_oauth.get_access_token(code)
+        return auth_url
+    else:
+        return "User already authenticated"
+
+
+def authenticate_user(response):
+    scope = 'playlist-modify-private'
+    cache_path = '.spotify_cache'
+    sp_oauth = oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri,
+                                   scope=scope, cache_path=cache_path)
+    token_info = sp_oauth.get_cached_token()
+    if not token_info:
+        # here response is the url returned by the auth page
+        code = sp_oauth.parse_response_code(response)
+        token_info = sp_oauth.get_access_token(code)
+        return token_info['access_token']
+
+
 def get_token():
     scope = 'playlist-modify-private'
-    token = util.prompt_for_user_token(username, scope, client_id=client_id, client_secret=client_secret,
-                                       redirect_uri=redirect_uri)
-    return token
+    cache_path = '.spotify_cache'
+    sp_oauth = oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri,
+                                   scope=scope, cache_path=cache_path)
+    token_info = sp_oauth.get_cached_token()
+    if token_info:
+        return token_info['access_token']
+    else:
+        raise spotipy.SpotifyException(550, -1, 'no credentials set')
 
 
 # gets a users public playlist , returns models.Playlist[]
