@@ -8,6 +8,7 @@ from flask import url_for
 from flask import flash
 from flask import send_from_directory
 from flask import current_app
+from flask import g
 
 import os
 import redis
