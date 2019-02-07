@@ -11,7 +11,13 @@ app = Flask(__name__)
 app.register_blueprint(admin_panel, url_prefix="/admin")
 app.register_blueprint(client, url_prefix="/api")
 
+
+if __name__ == '__main__' :
+    app.run(debug=True)
+
+
 # let this code stay here for future reference
+#
 # @app.route('/add/<int:param1>/<int:param2>')
 # def add(param1: int, param2: int) -> str:
 #     task = celery.send_task('tasks.add', args=[param1, param2], kwargs={})
