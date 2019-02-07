@@ -10,6 +10,7 @@ from flask import send_from_directory
 from flask import current_app
 
 import os
+import redis
 
 client = Blueprint('client', __name__, static_folder='static', template_folder='templates')
 REDIS_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
