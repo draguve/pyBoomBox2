@@ -142,14 +142,14 @@ def check_task(task_id: str) -> str:
     else:
         return str(res.result)
 
-#FOR REFERENCE
-@admin_panel.route('/redis_set/<string:text>')
-def redis_set(text):
-    get_redis_db().hmset("test", text)
-    return 'set'
-
-
-@admin_panel.route('/redis_get')
-def redis_get():
-    x = get_redis_db().hmget('test')
-    return x
+# FOR REFERENCE
+# @admin_panel.route('/redis_set/<string:text>')
+# def redis_set(text):
+#     get_redis_db().set("test", text)
+#     return 'set'
+#
+#
+# @admin_panel.route('/redis_get')
+# def redis_get():
+#     x = get_redis_db().get('test')
+#     return x
