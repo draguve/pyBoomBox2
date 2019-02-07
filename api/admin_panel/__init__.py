@@ -9,16 +9,21 @@ from flask import flash
 from flask import send_from_directory
 from flask import current_app
 from flask import g
+
 from functools import wraps
 from passlib.hash import sha256_crypt as sha
 import sqlite3
+import redis
+import os
+
 from worker import celery
-# from worker import cache #<- important for cache
 import celery.states as states
 
 admin_panel = Blueprint('admin_panel', __name__, static_folder='static', template_folder='templates')
 
+REDIS_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 Database = 'LoginPage.db'
+
 
 @admin_panel.route('/')
 def index():
@@ -55,6 +60,13 @@ def execute_db(query, args=()):  # executes a sql command like alter table and i
     cur.execute(query, args)
     conn.commit()
     cur.close()
+
+
+def get_redis_db():
+    redis_db = getattr(g, '_redis', None)
+    if redis_db is None:
+        redis_db = g._redis = redis.from_url(REDIS_URL)
+    return redis_db
 
 
 @admin_panel.route('/login', methods=['POST', 'GET'])
@@ -101,19 +113,6 @@ def signup():
         flash("User Created", "success")
         return redirect(url_for("admin_panel.login"))
 
-      
-# FOR REFERENCE
-# @admin_panel.route('/cache_set/<string:text>')
-# def cache_set(text):
-#     cache.set("test", text)
-#     return 'set'
-#
-#
-# @admin_panel.route('/cache_get')
-# def cache_get():
-#     x = cache.get('test')
-#     return x
-
 
 @admin_panel.route('/get_url')
 def get_url():
@@ -121,7 +120,7 @@ def get_url():
     response = f"<a href='{url_for('admin_panel.check_task', task_id=task.id, external=True)}'>" \
         f"check status of {task.id} </a>"
     return response
-  
+
 
 @admin_panel.route('/auth_url', methods=['POST', 'GET'])
 def auth_url():
@@ -143,3 +142,14 @@ def check_task(task_id: str) -> str:
     else:
         return str(res.result)
 
+#FOR REFERENCE
+@admin_panel.route('/redis_set/<string:text>')
+def redis_set(text):
+    get_redis_db().hmset("test", text)
+    return 'set'
+
+
+@admin_panel.route('/redis_get')
+def redis_get():
+    x = get_redis_db().hmget('test')
+    return x
