@@ -66,3 +66,4 @@ redis-stable/
 
 #pyCharm
 .idea/
+venv/

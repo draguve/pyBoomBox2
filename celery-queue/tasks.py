@@ -1,5 +1,4 @@
 import os
-import time
 import spotify
 import json
 import redis

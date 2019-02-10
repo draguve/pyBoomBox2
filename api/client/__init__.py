@@ -15,12 +15,14 @@ import redis
 from worker import celery
 
 client = Blueprint('client', __name__, static_folder='static', template_folder='templates')
-REDIS_URL = os.environ.get('REDIS_BROKER_URL', 'redis://localhost:6379/0')
+REDIS_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 
+
+@client.route('/test/')
 def test():
-    task = celery.send_task('tasks.add')
-    response = f"<a href='{url_for('check_task', task_id=task.id, external=True)}'>check status of {task.id} </a>"
-    return True
+    task = celery.send_task('spotify.create_playlist')
+    return "Done"
+
 
 @client.route('/', methods=['GET', 'POST'])
 def request_handler():
@@ -44,21 +46,20 @@ def request_handler():
         # </form>
         # """
 
+
 def get_redis_db():
     redis_db = getattr(g, '_redis', None)
     if redis_db is None:
         redis_db = g._redis = redis.from_url(REDIS_URL)
     return redis_db
 
-@client.route('/test')
-def index():
-    return "Test"
 
 # FOR REFERENCE
 @client.route('/redis_set/<string:text>')
 def redis_set(text):
     get_redis_db().set("test", text)
     return get_redis_db().get('test')
+
 
 @client.route('/redis_get/')
 def redis_get():
