@@ -64,6 +64,15 @@ def get_playlists(user, limit, offset):
     return playlists
 
 
+def get_private_playlists(limit,offset):
+    sp = spotipy.Spotify(auth=get_token())
+    all_playlist_json = sp.current_user_playlists(limit=limit, offset=offset)
+    playlists = []
+    for playlist_json in all_playlist_json['items']:
+        playlists.append(Playlist(playlist_json))
+    return playlists
+
+
 # gets the content from the users playlists and returns a models.Track[]
 def get_playlist_content(user, playlistid=None, fields=None):
     sp = spotipy.Spotify(auth=get_token())
