@@ -13,23 +13,22 @@ from flask import g
 import os
 import redis
 from worker import celery
+import json
 
 client = Blueprint('client', __name__, static_folder='static', template_folder='templates')
 REDIS_URL = os.environ.get('REDIS_BROKER_URL', 'redis://localhost:6379/0')
-
 def test():
     task = celery.send_task('tasks.add')
     response = f"<a href='{url_for('check_task', task_id=task.id, external=True)}'>check status of {task.id} </a>"
     return True
-
 @client.route('/', methods=['GET', 'POST'])
 def request_handler():
     if request.method == 'POST':
         if request.is_json:
             req = request.get_json()
-
-            if req['type'] == RequestTypes.addVote:
-                pass
+            if is_valid(req['id']):
+                if req['type'] == RequestTypes.addVote:
+                    pass
         else:
             return request.form['firstname'] + " is a bitch"
     else:
@@ -50,19 +49,29 @@ def get_redis_db():
         redis_db = g._redis = redis.from_url(REDIS_URL)
     return redis_db
 
-@client.route('/test')
+@client.route('/t/')
+def tst():
+    return 'ass'
+
+@client.route('/test/')
 def index():
-    return "Test"
+    value = {
+        'a':'A',
+        'b':'B'
+    }
+    redis_set('key',value)
+    print(redis_get('key'))
 
 # FOR REFERENCE
-@client.route('/redis_set/<string:text>')
-def redis_set(text):
-    get_redis_db().set("test", text)
-    return get_redis_db().get('test')
+def redis_set(key:str, val):
+    value = json.dumps(val)
+    get_redis_db().set(key,value)
 
-@client.route('/redis_get/')
-def redis_get():
-    x = get_redis_db().get('test')
-    return x
+def redis_get(key:str):
+    value = get_redis_db().get(key)
+    return json.loads(value)
+
+def is_valid(id:str):
+    id_list = redis_get('id_list')
 
 # requests.post('http://localhost:5000/api/add_message/1234', json={"mytext":"lalala"})
