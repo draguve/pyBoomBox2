@@ -69,7 +69,8 @@ def get_redis_db():
         redis_db = g._redis = redis.from_url(REDIS_URL)
     return redis_db
 
-
+# TODO: do the same validation for the login as in the registration form
+# TODO: move the registration form classes to a different file to remove clutter
 @admin_panel.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == "GET":
@@ -91,9 +92,11 @@ def login():
         else:
             flash("Incorrect Password", "danger")
             return render_template("login.html")
+
+
 class RegistrationForm(Form):
     username = StringField('Username', [validators.Length(min=4, max=25)])
-   
+
     password = PasswordField('New Password', [
         validators.DataRequired(),
         validators.EqualTo('confirm', message='Passwords must match')
@@ -101,18 +104,20 @@ class RegistrationForm(Form):
     confirm = PasswordField('Repeat Password')
     accept_tos = BooleanField('I accept the TOS', [validators.DataRequired()])
 
+
 @admin_panel.route('/signup', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm(request.form)
-    if query_db("select username from login where username = ?",( form.username.data,)):
-        flash("User already taken","danger")
-        return render_template("register.html",form=form)
+    if query_db("select username from login where username = ?", (form.username.data,)):
+        flash("User already taken", "danger")
+        return render_template("register.html", form=form)
     if request.method == 'POST' and form.validate():
         password = sha.encrypt(form.password.data)
-        execute_db("insert into login values(?,?)", (form.username.data,password,))
+        execute_db("insert into login values(?,?)", (form.username.data, password,))
         flash('Thanks for registering')
         return redirect(url_for('admin_panel.login'))
     return render_template('register.html', form=form)
+
 
 @admin_panel.route('/get_url')
 def get_url():
@@ -154,7 +159,7 @@ def check_task(task_id: str) -> str:
 #     x = get_redis_db().get('test')
 #     return x
 
-#OLD SIGNUP
+# OLD SIGNUP
 # @admin_panel.route('/signup', methods=['GET', 'POST'])
 # def signup():
 #     if request.method == "GET":
@@ -180,4 +185,3 @@ def check_task(task_id: str) -> str:
 #         execute_db("insert into login values(?,?)", (submission["username"], password,))
 #         flash("User Created", "success")
 #         return redirect(url_for("admin_panel.login"))
-

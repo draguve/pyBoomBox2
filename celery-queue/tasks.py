@@ -21,13 +21,9 @@ def response_url(response):
     return spotify.authenticate_user(response)
 
 
-@celery.task(name='spotify.create_playlist')
+@celery.task(name='spotify.current_song')
 def create_playlist():
-    vote_list = []
-    # TODO: create the list more smartly
-    tracks = spotify.get_playlist_content('spotify', '37i9dQZF1DX6z20IXmBjWI')
-    for track in tracks:
-        entry = [track, 0]
-        vote_list.append(entry)
-    redis_db.set('vote_list', json.dumps(vote_list))
+    # TODO: Current actually check the current song
+    current_song = spotify.get_track('4HlFJV71xXKIGcU3kRyttv').__dict__
+    redis_db.hmset("current_song", current_song)
     return True

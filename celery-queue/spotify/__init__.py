@@ -74,7 +74,7 @@ def get_private_playlists(limit,offset):
 
 
 # gets the content from the users playlists and returns a models.Track[]
-def get_playlist_content(user, playlistid=None, fields=None):
+def get_playlist_content(playlistid):
     sp = spotipy.Spotify(auth=get_token())
     all_tracks_json = []
     results = sp.user_playlist(username, playlistid, fields="tracks,next")
@@ -122,7 +122,7 @@ def get_tracks(track_ids):
 # Returns the current track playing
 def get_current_track():
     sp = spotipy.Spotify(auth=get_token())
-    json = sp.current_user_playing_track()
+    json = sp.currently_playing()
     # TODO Need to handle if no track is playing
     # TODO Need to store the other data provided , time till finish , is_playing ,check if its a song
     track = json['item']
