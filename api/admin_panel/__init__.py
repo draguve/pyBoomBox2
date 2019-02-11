@@ -26,20 +26,19 @@ REDIS_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 Database = 'LoginPage.db'
 
 
-@admin_panel.route('/')
-def index():
-    return "Test"
-
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("username") is None:
-            return redirect(url_for("login", next=request.url))
+            return redirect(url_for("admin_panel.login", next=request.url))
         return f(*args, **kwargs)
-
     return decorated_function
 
+@admin_panel.route('/')
+@login_required
+
+def index():
+    return "Test"
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -68,29 +67,6 @@ def get_redis_db():
     if redis_db is None:
         redis_db = g._redis = redis.from_url(REDIS_URL)
     return redis_db
-
-
-@admin_panel.route('/login', methods=['POST', 'GET'])
-def login():
-    if request.method == "GET":
-        return render_template("login.html")
-    else:
-        error = None
-        username = request.form["username"]
-        password = request.form["password"]
-        passhash = query_db("select password from login where username = ?", (username,))
-        if not passhash:
-            flash("User does not exist", "danger")
-            return render_template("login.html")
-
-        if sha.verify(password, passhash[0][0]):
-            flash("User exists")
-            session["username"] = username
-            flash("logged in", "danger")
-            return "logged in"
-        else:
-            flash("Incorrect Password", "danger")
-            return render_template("login.html")
 class RegistrationForm(Form):
     username = StringField('Username', [validators.Length(min=4, max=25)])
    
@@ -100,7 +76,34 @@ class RegistrationForm(Form):
     ])
     confirm = PasswordField('Repeat Password')
     accept_tos = BooleanField('I accept the TOS', [validators.DataRequired()])
+class LoginForm(Form):
+     username = StringField('Username', [validators.Length(min=4, max=25)])
+   
+     password = PasswordField('Password', [validators.DataRequired()])
 
+@admin_panel.route('/login', methods=['POST', 'GET'])
+def login():
+    
+    # if request.method == "GET":
+    #     return render_template("login.html")
+    # else:
+    error = None
+    form=LoginForm(request.form)
+    username = form.username.data
+    password = (form.password.data)
+    passhash = query_db("select password from login where username = ?", (username,))
+    if username is not ""and form.validate():
+        if not passhash:
+            flash("User does not exist", "danger")
+            return render_template("login.html",form=form)
+        if sha.verify(password, passhash[0][0]):
+            session["username"] = username
+            flash("logged in", "danger")
+            return redirect(url_for('admin_panel.index'))
+        else:
+            flash("Incorrect Password", "danger")
+            return render_template("login.html",form=form)
+    return render_template("login.html",form=form)
 @admin_panel.route('/signup', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm(request.form)

@@ -1,23 +1,21 @@
-<html>
-  <head>
-    <title>Flask Intro - login page</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="static/bootstrap.min.css" rel="stylesheet" media="screen">
-  </head>
-  <body>
-    <div class="container">
-      <h1>Please login</h1>
-      <br>
-      <form action=" {{ url_for('admin_panel.login') }}" method="post">
-        <input type="text" placeholder="Username" name="username" value="{{
-          request.form.username }}">
-         <input type="password" placeholder="Password" name="password" value="{{
-          request.form.password }}">
-        <input class="btn btn-default" type="submit" value="Login">
-      </form>
-      {% if error %}
-        <p class="error"><strong>Error:</strong> {{ error }}
-      {% endif %}
-    </div>
-  </body>
-</html>
+{% from "_formhelpers.html" import render_field %}
+<form method=post>
+  <h1>Login Page</h1>
+  <dl>
+    {{ render_field(form.username) }}
+
+    {{ render_field(form.password) }}
+
+  </dl>
+  <p><input type=submit value=Login>
+</form>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <script>
+      var messages = {{ messages | safe }}; 
+      for (var i=0; i<messages.length; i++) {
+        alert(messages[i]);
+      }
+    </script>
+  {% endif %}
+{% endwith %}
