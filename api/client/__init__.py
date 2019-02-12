@@ -17,19 +17,14 @@ import json
 import random
 
 client = Blueprint('client', __name__, static_folder='static', template_folder='templates')
-REDIS_URL = os.environ.get('REDIS_BROKER_URL', 'redis://192.168.137.54:7777/0')
+REDIS_URL = os.environ.get('REDIS_BROKER_URL', 'redis://localhost:6379/0')
 
-# def test():
-#     task = celery.send_task('tasks.add')
-#     response = f"<a href='{url_for('check_task', task_id=task.id, external=True)}'>check status of {task.id} </a>"
-#     return True
 
-def add_new_id(new_id):
-    id_list = redis_get('id_list')
-    id_list.update(new_id)
-    redis_set('id_list',id_list)
+@client.route('/test/')
+def test():
+    task = celery.send_task('spotify.create_playlist')
+    return "Done"
 
-# TODO: test add_client when redis server available
 @client.route('/', methods=['GET', 'POST'])
 def request_handler():
     if request.method == 'POST':
@@ -45,8 +40,8 @@ def request_handler():
                     'id' : new_id
                 }
                 return json.dumps(result)
-            elif valid(req['id']):
-                pass
+            
+            if valid(req['id']):
                 if req['type'] == RequestTypes.add_vote:
                     pass
         else:
@@ -61,13 +56,28 @@ def get_redis_db():
         redis_db = g._redis = redis.from_url(REDIS_URL)
     return redis_db
 
+@client.route('/t/')
+def tst():
+    return 'ass'
+
+@client.route('/test/')
+def index():
+    value = {
+        'a':'A',
+        'b':'B'
+    }
+    redis_set('key',value)
+    return str(redis_get('key'))
+
+# FOR REFERENCE
 def redis_set(key:str, val):
     value = json.dumps(val)
     get_redis_db().set(key,value)
 
-def redis_get(key:str):
-    value = get_redis_db().get(key)
-    return json.loads(value)
+@client.route('/redis_get/')
+def redis_get():
+    x = get_redis_db().get('test')
+    return x
 
 def valid(id:str):
     id_list = redis_get('id_list')
