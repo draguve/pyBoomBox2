@@ -19,11 +19,10 @@ import random
 client = Blueprint('client', __name__, static_folder='static', template_folder='templates')
 REDIS_URL = os.environ.get('REDIS_BROKER_URL', 'redis://192.168.137.54:7777/0')
 
-def test():
-    task = celery.send_task('tasks.add')
-    response = f"<a href='{url_for('check_task', task_id=task.id, external=True)}'>check status of {task.id} </a>"
-    return True
-
+# def test():
+#     task = celery.send_task('tasks.add')
+#     response = f"<a href='{url_for('check_task', task_id=task.id, external=True)}'>check status of {task.id} </a>"
+#     return True
 
 def add_new_id(new_id):
     id_list = redis_get('id_list')
@@ -46,8 +45,8 @@ def request_handler():
                     'id' : new_id
                 }
                 return json.dumps(result)
-            
-            if valid(req['id']):
+            elif valid(req['id']):
+                pass
                 if req['type'] == RequestTypes.add_vote:
                     pass
         else:
@@ -61,20 +60,6 @@ def get_redis_db():
         redis_db = g._redis = redis.from_url(REDIS_URL)
     return redis_db
 
-@client.route('/t/')
-def tst():
-    return 'ass'
-
-@client.route('/test/')
-def index():
-    value = {
-        'a':'A',
-        'b':'B'
-    }
-    redis_set('key',value)
-    return str(redis_get('key'))
-
-# FOR REFERENCE
 def redis_set(key:str, val):
     value = json.dumps(val)
     get_redis_db().set(key,value)
