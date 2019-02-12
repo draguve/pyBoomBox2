@@ -14,34 +14,46 @@ import os
 import redis
 from worker import celery
 import json
+import random
 
 client = Blueprint('client', __name__, static_folder='static', template_folder='templates')
-REDIS_URL = os.environ.get('REDIS_BROKER_URL', 'redis://localhost:6379/0')
+REDIS_URL = os.environ.get('REDIS_BROKER_URL', 'redis://192.168.137.54:7777/0')
+
 def test():
     task = celery.send_task('tasks.add')
     response = f"<a href='{url_for('check_task', task_id=task.id, external=True)}'>check status of {task.id} </a>"
     return True
+
+
+def add_new_id(new_id):
+    id_list = redis_get('id_list')
+    id_list.update(new_id)
+    redis_set('id_list',id_list)
+
+# TODO: test add_client when redis server available
 @client.route('/', methods=['GET', 'POST'])
 def request_handler():
     if request.method == 'POST':
         if request.is_json:
             req = request.get_json()
-            if is_valid(req['id']):
-                if req['type'] == RequestTypes.addVote:
+            if req['type'] == RequestTypes.add_client:
+                new_id = random.getrandbits(128)
+                while not valid(new_id):
+                    new_id = random.getrandbits(128)
+                add_new_id(new_id)
+                result = {
+                    'status' : 'client created',
+                    'id' : new_id
+                }
+                return json.dumps(result)
+            
+            if valid(req['id']):
+                if req['type'] == RequestTypes.add_vote:
                     pass
         else:
-            return request.form['firstname'] + " is a bitch"
+            return 'only json objects accepted'
     else:
         return 'invalid'
-        # """
-        # <form action="/api"  method="post">
-        #     First name:<br>
-        #     <input type="text" name="firstname" value=""><br>
-        #     Last name:<br>
-        #     <input type="text" name="lastname" value=""><br><br>
-        #     <input type="submit" value="Submit">
-        # </form>
-        # """
 
 def get_redis_db():
     redis_db = getattr(g, '_redis', None)
@@ -60,7 +72,7 @@ def index():
         'b':'B'
     }
     redis_set('key',value)
-    print(redis_get('key'))
+    return str(redis_get('key'))
 
 # FOR REFERENCE
 def redis_set(key:str, val):
@@ -71,7 +83,11 @@ def redis_get(key:str):
     value = get_redis_db().get(key)
     return json.loads(value)
 
-def is_valid(id:str):
+def valid(id:str):
     id_list = redis_get('id_list')
+    if id in id_list:
+        return True
+    else:
+        return False
 
 # requests.post('http://localhost:5000/api/add_message/1234', json={"mytext":"lalala"})

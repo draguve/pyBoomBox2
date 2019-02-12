@@ -1,5 +1,6 @@
 from enum import Enum
 
 class RequestTypes(Enum):
-    addVote = 1
-    suggestSong = 2
+    add_client = 1
+    add_vote = 2
+    suggest_song = 3
