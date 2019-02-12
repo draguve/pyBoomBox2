@@ -54,6 +54,7 @@ def request_handler():
     else:
         return 'invalid'
 
+
 def get_redis_db():
     redis_db = getattr(g, '_redis', None)
     if redis_db is None:

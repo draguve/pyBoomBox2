@@ -18,6 +18,7 @@ import os
 
 from worker import celery
 import celery.states as states
+from wtforms import Form, BooleanField, StringField, PasswordField, validators
 
 admin_panel = Blueprint('admin_panel', __name__, static_folder='static', template_folder='templates')
 
@@ -90,29 +91,28 @@ def login():
         else:
             flash("Incorrect Password", "danger")
             return render_template("login.html")
-
+class RegistrationForm(Form):
+    username = StringField('Username', [validators.Length(min=4, max=25)])
+   
+    password = PasswordField('New Password', [
+        validators.DataRequired(),
+        validators.EqualTo('confirm', message='Passwords must match')
+    ])
+    confirm = PasswordField('Repeat Password')
+    accept_tos = BooleanField('I accept the TOS', [validators.DataRequired()])
 
 @admin_panel.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == "GET":
-        return render_template("signup.html")
-    else:
-        submission = {"username": request.form["username"], "pass": request.form["password"],
-                      "conf_pass": request.form["conf_pass"]}
-
-        if submission["pass"] != submission["conf_pass"]:
-            flash("Passwords don't match", "danger")
-            return render_template("signup.html")
-
-        if query_db("select username from login where username = ?", (submission["username"],)):
-            flash("User already taken", "danger")
-            return render_template("signup.html")
-
-        password = sha.encrypt(submission["pass"])
-        execute_db("insert into login values(?,?)", (submission["username"], password,))
-        flash("User Created", "success")
-        return redirect(url_for("admin_panel.login"))
-
+def register():
+    form = RegistrationForm(request.form)
+    if query_db("select username from login where username = ?",( form.username.data,)):
+        flash("User already taken","danger")
+        return render_template("register.html",form=form)
+    if request.method == 'POST' and form.validate():
+        password = sha.encrypt(form.password.data)
+        execute_db("insert into login values(?,?)", (form.username.data,password,))
+        flash('Thanks for registering')
+        return redirect(url_for('admin_panel.login'))
+    return render_template('register.html', form=form)
 
 @admin_panel.route('/get_url')
 def get_url():
@@ -153,3 +153,31 @@ def check_task(task_id: str) -> str:
 # def redis_get():
 #     x = get_redis_db().get('test')
 #     return x
+
+#OLD SIGNUP
+# @admin_panel.route('/signup', methods=['GET', 'POST'])
+# def signup():
+#     if request.method == "GET":
+#         return render_template("signup.html")
+#     else:
+#         submission = {"username": request.form["username"], "pass": request.form["password"],
+#                       "conf_pass": request.form["conf_pass"]}
+
+#         if submission["pass"] != submission["conf_pass"]:
+#             flash("Passwords don't match", "danger")
+#             return render_template("signup.html")
+
+#         if query_db("select username from login where username = ?", (submission["username"],)):
+#             flash("User already taken", "danger")
+#             return render_template("signup.html")
+#         if submission["username"]=="":
+#             flash("Please enter a valid username")
+#             return render_template("signup.html")
+#         if submission["pass"]=="":
+#             flash("Please enter a valid username")
+#             return render_template("signup.html")
+#         password = sha.encrypt(submission["pass"])
+#         execute_db("insert into login values(?,?)", (submission["username"], password,))
+#         flash("User Created", "success")
+#         return redirect(url_for("admin_panel.login"))
+
