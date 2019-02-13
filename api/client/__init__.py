@@ -58,6 +58,8 @@ def request_handler():
             elif valid(req['id']):
                 if req['type'] == RequestTypes.add_vote.value:
                     return add_vote(req['song'])
+                elif req['type'] == RequestTypes.get_all_songs.value:
+                    return redis_get('song_list')
         else:
             return 'only json objects accepted'
     else:
